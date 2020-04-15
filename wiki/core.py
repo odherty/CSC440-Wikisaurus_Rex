@@ -245,6 +245,9 @@ class Wiki(object):
     def path(self, url):
         return os.path.join(self.root, url + '.md')
 
+    def history_path(self, url):
+        return os.path.join(self.root, "history", url)
+
     def exists(self, url):
         path = self.path(url)
         return os.path.exists(path)
