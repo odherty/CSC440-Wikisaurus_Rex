@@ -22,6 +22,10 @@ from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
 
+from wiki.web.history import update_history
+
+import os #temporary, remove later
+
 
 bp = Blueprint('wiki', __name__)
 
@@ -68,6 +72,7 @@ def edit(url):
         if not page:
             page = current_wiki.get_bare(url)
         form.populate_obj(page)
+        update_history(url)
         page.save()
         flash('"%s" was saved.' % page.title, 'success')
         return redirect(url_for('wiki.display', url=url))
@@ -181,12 +186,29 @@ def page_not_found(error):
     return render_template('404.html'), 404
 
 
-
 @bp.route('/history/<path:url>/', methods=['GET', 'POST'])
 @protect
 def history_list(url):
     path = current_wiki.history_path(url)
-
     #if history path doesn't exist, show no history page
 
-    return render_template('history_list.html')
+    file_names = ["v1.md", "v2.md"]
+
+    for filename in os.listdir(path):
+        if filename.endswith(".md"):
+            print(filename)
+            continue
+        else:
+            continue
+
+    return render_template('history_list.html', file_names=file_names)
+
+
+@bp.route('/history_page/<id>/<path:url>/', methods=['GET', 'POST'])
+@protect
+def history_page(id, url):
+    # build the url to the history page
+    url = "history/" + url + "/" + id
+    print(url)
+    page = current_wiki.get_or_404(url)
+    return render_template('page.html', page=page)
