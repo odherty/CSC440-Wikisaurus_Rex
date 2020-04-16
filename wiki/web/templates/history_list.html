@@ -8,7 +8,7 @@
     <ul>
         {% for file_name in file_names %}
             <li>
-                <a href="{{ url_for('wiki.display', url=file_name) }}">{{ file_name }}</a>
+                <a href="{{ links[loop.index0] }}">{{ file_name }}</a>
             </li>
         {% endfor %}
     </ul>

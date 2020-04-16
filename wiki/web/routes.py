@@ -190,18 +190,23 @@ def page_not_found(error):
 @protect
 def history_list(url):
     path = current_wiki.history_path(url)
-    #if history path doesn't exist, show no history page
+    # if history path doesn't exist, show no history page
 
-    file_names = ["v1.md", "v2.md"]
+    file_names = []
+    links = []
 
     for filename in os.listdir(path):
         if filename.endswith(".md"):
-            print(filename)
+            file_names.append(filename)
             continue
         else:
             continue
 
-    return render_template('history_list.html', file_names=file_names)
+    for filename in file_names:
+        page_link = "/history_page/" + filename[:-3] + "/" + url
+        links.append(page_link)
+
+    return render_template('history_list.html', file_names=file_names, links=links)
 
 
 @bp.route('/history_page/<id>/<path:url>/', methods=['GET', 'POST'])
