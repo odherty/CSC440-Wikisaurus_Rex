@@ -217,7 +217,7 @@ def history_list(url):
 def history_page(id, url):
     # build the url to the history page
     url = "history/" + url + "/" + id
-    print(url)
+
     page = current_wiki.get_or_404(url)
 
     # modify the title to include that it is an archived version
