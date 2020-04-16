@@ -223,4 +223,4 @@ def history_page(id, url):
     # modify the title to include that it is an archived version
     page.title = page.title + " (Old Revision: " + id + ")"
 
-    return render_template('page.html', page=page)
+    return render_template('history_page.html', page=page)
