@@ -192,21 +192,24 @@ def history_list(url):
     path = current_wiki.history_path(url)
     # if history path doesn't exist, show no history page
 
-    file_names = []
+    file_ids = []
     links = []
 
     for filename in os.listdir(path):
         if filename.endswith(".md"):
-            file_names.append(filename)
+            file_ids.append(get_history_id(filename))
             continue
         else:
             continue
 
-    for filename in file_names:
-        page_link = "/history_page/" + get_history_id(filename) + "/" + url
+    # show in reverse chronological order (most recent first)
+    file_ids.reverse()
+
+    for file_id in file_ids:
+        page_link = "/history_page/" + file_id + "/" + url
         links.append(page_link)
 
-    return render_template('history_list.html', file_names=file_names, links=links)
+    return render_template('history_list.html', file_ids=file_ids, links=links)
 
 
 @bp.route('/history_page/<id>/<path:url>/', methods=['GET', 'POST'])
@@ -216,4 +219,8 @@ def history_page(id, url):
     url = "history/" + url + "/" + id
     print(url)
     page = current_wiki.get_or_404(url)
+
+    # modify the title to include that it is an archived version
+    page.title = page.title + " (Old Revision: " + id + ")"
+
     return render_template('page.html', page=page)

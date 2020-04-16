@@ -48,5 +48,11 @@ def update_history(url):
     shutil.copyfile(page_path, directory_path + "/" + date_time_string + ".md")
 
 
+# removes .md from file name to get the history id
 def get_history_id(file_name):
     return file_name[:-3]
+
+
+# converts the history id of an archive page to a readable date/time
+def get_date_from_id(hid):
+    return hid

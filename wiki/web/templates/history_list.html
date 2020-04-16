@@ -6,9 +6,9 @@
 {% block content %}
 <p>Hello</p>
     <ul>
-        {% for file_name in file_names %}
+        {% for file_id in file_ids %}
             <li>
-                <a href="{{ links[loop.index0] }}">{{ file_name }}</a>
+                <a href="{{ links[loop.index0] }}">{{ file_id }}</a>
             </li>
         {% endfor %}
     </ul>
