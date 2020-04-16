@@ -22,7 +22,7 @@ from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
 
-from wiki.web.history import update_history
+from wiki.web.history import update_history, get_history_id
 
 import os #temporary, remove later
 
@@ -72,8 +72,8 @@ def edit(url):
         if not page:
             page = current_wiki.get_bare(url)
         form.populate_obj(page)
-        update_history(url)
         page.save()
+        update_history(url)
         flash('"%s" was saved.' % page.title, 'success')
         return redirect(url_for('wiki.display', url=url))
     return render_template('editor.html', form=form, page=page)
@@ -203,7 +203,7 @@ def history_list(url):
             continue
 
     for filename in file_names:
-        page_link = "/history_page/" + filename[:-3] + "/" + url
+        page_link = "/history_page/" + get_history_id(filename) + "/" + url
         links.append(page_link)
 
     return render_template('history_list.html', file_names=file_names, links=links)

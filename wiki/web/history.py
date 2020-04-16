@@ -1,10 +1,17 @@
 import os
+import shutil
+import datetime
 from wiki.web import current_wiki
 
 
 
 def update_history(url):
+    # the directory containing past versions of the page
     directory_path = current_wiki.history_path(url)
+
+    # if the path doesn't exist, create it (page is first saved/created)
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
 
     history_files = []
 
@@ -20,16 +27,26 @@ def update_history(url):
 
     # now reverse to edit/rename the oldest files first
     history_files.reverse()
-
+    '''
     for hf in history_files:
-        history_id = int(hf[:-3])  # remove .md to get the id number
+        history_id, no_id = get_history_id(hf)  # split the file into it's id and date
+
+        history_id = int(history_id) # convert to a number to increment
 
         # increment id by one and rename this history file
         new_id = history_id + 1
-        os.rename(directory_path+"/"+hf, directory_path+"/"+str(new_id)+".md")
-
-    # now save the version of the page before this edit as the most recent history version
+        os.rename(directory_path+"/"+hf, directory_path+"/"+str(new_id)+no_id)
+    '''
+    # now copy the newest version of the page to history so we can save its date (and for when the page is edited again)
 
     page_path = current_wiki.path(url)
-    os.rename(page_path, directory_path + "/1.md")
 
+    date_time_string = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
+    print(date_time_string)
+
+    # copy the newest version of the page as
+    shutil.copyfile(page_path, directory_path + "/" + date_time_string + ".md")
+
+
+def get_history_id(file_name):
+    return file_name[:-3]
