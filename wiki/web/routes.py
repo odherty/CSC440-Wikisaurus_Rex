@@ -192,6 +192,12 @@ def history_list(url):
     path = current_wiki.history_path(url)
     # if history path doesn't exist, show no history page
 
+    page = current_wiki.get(url)
+
+    # no history or non-existent page
+    if not os.path.exists(path) or page is None:
+        return render_template("404.html")
+
     file_ids = []
     links = []
 
@@ -209,7 +215,7 @@ def history_list(url):
         page_link = "/history_page/" + file_id + "/" + url
         links.append(page_link)
 
-    return render_template('history_list.html', file_ids=file_ids, links=links)
+    return render_template('history_list.html', page=page, file_ids=file_ids, links=links)
 
 
 @bp.route('/history_page/<id>/<path:url>/', methods=['GET', 'POST'])
