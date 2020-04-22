@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.get_id() }}'s Profile{% endblock title %}
+
+{% block content %}
+    Welcome, {{ user.get_id() }}!
+
+    {% if current_user.get_id() == user.get_id() %}
+        <form class="form form-inline" method="POST">
+            {{ form.hidden_tag() }}
+            <p>Change Password?</p>
+	            {{ form.password(placeholder='Password') }}
+            <p>To change these attributes, enter current password:</p>
+                {{ form.current_password(placeholder='Current Password') }}
+            <br>
+            <input type="submit" class="btn btn-primary" value="Update">
+        </form>
+    {% endif %}
+{% endblock content %}
