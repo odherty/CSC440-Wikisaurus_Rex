@@ -122,6 +122,29 @@ def tag(name):
     tagged = current_wiki.index_by_tag(name)
     return render_template('tag.html', pages=tagged, tag=name)
 
+@bp.route('/<path:url>/related/')
+@protect
+def related(url):
+    # get url
+    page = current_wiki.get_or_404(url)
+
+    # make list of tags about original article
+    tags = page.tags
+    tagslist =  tags.split(", ")
+
+    #blank list to hold other articles with the same tags
+    tagged = []
+    for i in tagslist:
+        # append tag category
+        tagged.append(i.capitalize())
+        #check if list of articles is only the original article, if not then add the article
+        if len(current_wiki.index_by_tag(i)) > 1:
+            tagged += current_wiki.index_by_tag(i)
+        #if there are no other articles other than the orignal article, append this statement
+        else:
+            tagged.append("No other wikis with this tag")
+      
+    return render_template('related.html', tags=tagslist, page = page, pages = tagged)
 
 @bp.route('/search/', methods=['GET', 'POST'])
 @protect
