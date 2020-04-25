@@ -26,9 +26,11 @@
 							</ul>
 
 							<ul class="nav pull-right">
-								{% if current_user.is_anonymous %}
+                                <li></li>
+								{% if not current_user.is_active %}
 									<li><a href="{{ url_for('wiki.user_login') }}">Login</a></li>
 								{% else %}
+                                    <li><a href="{{ url_for('wiki.user_display', username=current_user.get_id()) }}">{{ current_user.get_id() }}</a></li>
 									<li><a href="{{ url_for('wiki.user_logout') }}">Logout</a></li>
 								{% endif %}
 							</ul>

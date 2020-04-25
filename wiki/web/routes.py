@@ -16,6 +16,7 @@ from flask_login import logout_user
 from wiki.core import Processor
 from wiki.web.forms import EditorForm
 from wiki.web.forms import LoginForm
+from wiki.web.forms import UserUpdateForm
 from wiki.web.forms import SearchForm
 from wiki.web.forms import URLForm
 from wiki.web import current_wiki
@@ -24,8 +25,7 @@ from wiki.web.user import protect
 
 from wiki.web.history import update_history, get_history_id
 
-import os #temporary, remove later
-
+import os  # temporary, remove later
 
 bp = Blueprint('wiki', __name__)
 
@@ -134,6 +134,19 @@ def search():
     return render_template('search.html', form=form, search=None)
 
 
+@bp.route('/user/<string:username>', methods=['GET', 'POST'])
+def user_display(username):
+    user = current_users.get_user(username)
+    form = UserUpdateForm()
+    if form.validate_on_submit():
+        if form.password.data != '':
+            current_user.set('password', form.password.data)
+        if form.email.data != '':
+            current_user.set('email', form.email.data)
+        flash('Profile Updated!', 'success')
+    return render_template('user.html', user=user, form=form)
+
+
 @bp.route('/user/login/', methods=['GET', 'POST'])
 def user_login():
     form = LoginForm()
@@ -141,6 +154,7 @@ def user_login():
         user = current_users.get_user(form.name.data)
         login_user(user)
         user.set('authenticated', True)
+        user.set('active', True)
         flash('Login successful.', 'success')
         return redirect(request.args.get("next") or url_for('wiki.index'))
     return render_template('login.html', form=form)
@@ -150,6 +164,7 @@ def user_login():
 @login_required
 def user_logout():
     current_user.set('authenticated', False)
+    current_user.set('active', False)
     logout_user()
     flash('Logout successful.', 'success')
     return redirect(url_for('wiki.index'))
