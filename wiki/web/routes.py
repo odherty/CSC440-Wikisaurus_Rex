@@ -139,8 +139,11 @@ def user_display(username):
     user = current_users.get_user(username)
     form = UserUpdateForm()
     if form.validate_on_submit():
-        current_user.set('password', form.password.data)
-        flash('Password Changed!', 'success')
+        if form.password.data != '':
+            current_user.set('password', form.password.data)
+        if form.email.data != '':
+            current_user.set('email', form.email.data)
+        flash('Profile Updated!', 'success')
     return render_template('user.html', user=user, form=form)
 
 

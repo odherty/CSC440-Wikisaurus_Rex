@@ -60,7 +60,8 @@ class LoginForm(Form):
 
 
 class UserUpdateForm(Form):
-    password = PasswordField('', [InputRequired()])
+    email = TextField('')
+    password = PasswordField('')
     current_password = PasswordField('', [InputRequired()])
 
     def validate_password(form, field):
