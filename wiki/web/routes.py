@@ -23,9 +23,9 @@ from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
 
-from wiki.web.history import update_history, get_history_id
+from wiki.web.history import update_history, get_history_id, format_history_id
 
-import os  # temporary, remove later
+import os
 
 bp = Blueprint('wiki', __name__)
 
@@ -209,12 +209,13 @@ def history_list(url):
 
     page = current_wiki.get(url)
 
-    # no history or non-existent page
+    # no history or non-existent page, show the no history page
     if not os.path.exists(path) or page is None:
-        return render_template("404.html")
+        return render_template("no_history.html", page_name=url)
 
     file_ids = []
     links = []
+    link_names = []
 
     for filename in os.listdir(path):
         if filename.endswith(".md"):
@@ -230,7 +231,10 @@ def history_list(url):
         page_link = "/history_page/" + file_id + "/" + url
         links.append(page_link)
 
-    return render_template('history_list.html', page=page, file_ids=file_ids, links=links)
+        link_name = format_history_id(file_id)
+        link_names.append(link_name)
+
+    return render_template('history_list.html', page=page, file_ids=file_ids, links=links, link_names=link_names)
 
 
 @bp.route('/history_page/<id>/<path:url>/', methods=['GET', 'POST'])
@@ -242,6 +246,6 @@ def history_page(id, url):
     page = current_wiki.get_or_404(url)
 
     # modify the title to include that it is an archived version
-    page.title = page.title + " (Old Revision: " + id + ")"
+    page.title = page.title + " (Old Revision: " + format_history_id(id) + ")"
 
     return render_template('history_page.html', page=page)

@@ -56,3 +56,12 @@ def get_history_id(file_name):
 # converts the history id of an archive page to a readable date/time
 def get_date_from_id(hid):
     return hid
+
+
+# formats the history id (containing date and time of edit) into a readable format for display
+def format_history_id(hid):
+    time_str = hid[14:].replace("-", ":")
+    if time_str[0] == "0":
+        time_str = time_str[1:]
+
+    return hid[:10] + " " + time_str
