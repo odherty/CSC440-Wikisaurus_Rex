@@ -1,11 +1,22 @@
 from unittest import mock
 import unittest
 
-from Riki import app
 
-from wiki.web.routes import user_create
+def mockRender(**args):
+    returnValue = []
+    for i in args:
+        returnValue.append(i)
 
-class TestAdminPage(unittest.TestCase):
-   
-    def test_admin(self, mocked_render):
-        self.assertEquals(user_create, 1)
+    return returnValue
+
+
+
+class TestAdminPage(TestCase):
+
+    @mock.patch('flask.render_template','mockRender')
+    def test_user_create(mockRender):
+        response = user_create()
+        print(response)
+
+
+     
