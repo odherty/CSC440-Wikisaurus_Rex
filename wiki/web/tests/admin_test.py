@@ -17,9 +17,6 @@ class AdminUserTest(unittest.TestCase):
         self.app.testing = True
 
      
-    def test_givenUser_whenChangePassword_thenJsonUpdates(self):
-        user = self.user_mng.get_user("name")
-        old_password = user.get('password')
-        user.set('password', '123')
-        self.assertEqual('123', user.get('password'))
-        user.set('password', old_password)
+    def test_givenEndpoint(self):
+        result = self.app.get('/user/')
+        self.assertEqual(result.status_code, 500)
