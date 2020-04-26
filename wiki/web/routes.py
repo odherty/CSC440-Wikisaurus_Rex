@@ -24,10 +24,16 @@ from wiki.web.forms import UserForm
 from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
+<<<<<<< HEAD
+from wiki.web.user import UserManager
+from wiki.web.user import User
+#from Riki import app
+=======
 
 from wiki.web.history import update_history, get_history_id, format_history_id
 
 import os
+<<<<<<< HEAD
 from wiki.web.user import UserManager
 from wiki.web.user import User
 #from Riki import app
@@ -35,6 +41,9 @@ from wiki.web.user import User
 from wiki.web.history import update_history, get_history_id, format_history_id
 
 import os
+=======
+>>>>>>> c8cc53c38f0383d0720562269d4a0766e239059a
+>>>>>>> b859fc21175a1ee37773de31a88c6e504823ff54
 
 bp = Blueprint('wiki', __name__)
 
@@ -54,7 +63,11 @@ def index():
     pages = current_wiki.index()
     user = current_user.get("roles")
     isAdmin = False
+<<<<<<< HEAD
     if 'admin' in user:
+=======
+    if user == ['admin']:
+>>>>>>> b859fc21175a1ee37773de31a88c6e504823ff54
         isAdmin = True
     return render_template('index.html', pages=pages, isAdmin = isAdmin)
 
@@ -171,17 +184,29 @@ def user_logout():
 def user_index():
     user = current_users
     usermanager = UserManager.read(user)
+<<<<<<< HEAD
     if 'admin' not in current_user.get("roles") :
         flash("You do not have the permissions to see this page")
         return render_template('index.html')
 
     return render_template('user.html', usermanager = usermanager)
+=======
+    if current_user.get("roles") != ["admin"]:
+        flash("You do not have the permissions to see this page")
+        return render_template('index.html')
+>>>>>>> b859fc21175a1ee37773de31a88c6e504823ff54
 
+    return render_template('user.html', usermanager = usermanager)
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> b859fc21175a1ee37773de31a88c6e504823ff54
 @bp.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
     form = UserForm()
     user = UserManager(current_app.config['USER_DIR'])
+<<<<<<< HEAD
 
     if form.validate_on_submit():
         if form.admin.data:
@@ -191,6 +216,17 @@ def user_create():
         user.add_user(form.name.data, form.password.data, True, roles, form.authenticationMethod.data)
         return redirect(url_for("wiki.user_index"))
 
+=======
+
+    if form.validate_on_submit():
+        if form.admin.data:
+            roles = ['admin']
+        else:
+            roles = ''
+        user.add_user(form.name.data, form.password.data, True, roles, None)
+        return redirect(url_for("wiki.user_index"))
+
+>>>>>>> b859fc21175a1ee37773de31a88c6e504823ff54
     return render_template('usercreate.html', form=form)
 
  
@@ -234,6 +270,8 @@ def user_delete(user_name):
 def page_not_found(error):
     return render_template('404.html'), 404
 
+<<<<<<< HEAD
+=======
 
 @bp.route('/history/<path:url>/', methods=['GET', 'POST'])
 def history_list(url):
@@ -288,3 +326,4 @@ def history_page(id, url):
     page.title = page.title + " (Old Revision: " + format_history_id(id) + ")"
 
     return render_template('history_page.html', page=page)
+>>>>>>> c8cc53c38f0383d0720562269d4a0766e239059a
