@@ -7,25 +7,26 @@ from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import request
+from flask import current_app
 from flask import url_for
 from flask_login import current_user
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
+from werkzeug.datastructures import MultiDict
 
 from wiki.core import Processor
 from wiki.web.forms import EditorForm
 from wiki.web.forms import LoginForm
-from wiki.web.forms import UserUpdateForm
 from wiki.web.forms import SearchForm
 from wiki.web.forms import URLForm
+from wiki.web.forms import UserForm
 from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
-
-from wiki.web.history import update_history, get_history_id
-
-import os  # temporary, remove later
+from wiki.web.user import UserManager
+from wiki.web.user import User
+#from Riki import app
 
 bp = Blueprint('wiki', __name__)
 
@@ -43,7 +44,11 @@ def home():
 @protect
 def index():
     pages = current_wiki.index()
-    return render_template('index.html', pages=pages)
+    user = current_user.get("roles")
+    isAdmin = False
+    if user == ['admin']:
+        isAdmin = True
+    return render_template('index.html', pages=pages, isAdmin = isAdmin)
 
 
 @bp.route('/<path:url>/')
@@ -73,7 +78,6 @@ def edit(url):
             page = current_wiki.get_bare(url)
         form.populate_obj(page)
         page.save()
-        update_history(url)
         flash('"%s" was saved.' % page.title, 'success')
         return redirect(url_for('wiki.display', url=url))
     return render_template('editor.html', form=form, page=page)
@@ -134,19 +138,6 @@ def search():
     return render_template('search.html', form=form, search=None)
 
 
-@bp.route('/user/<string:username>', methods=['GET', 'POST'])
-def user_display(username):
-    user = current_users.get_user(username)
-    form = UserUpdateForm()
-    if form.validate_on_submit():
-        if form.password.data != '':
-            current_user.set('password', form.password.data)
-        if form.email.data != '':
-            current_user.set('email', form.email.data)
-        flash('Profile Updated!', 'success')
-    return render_template('user.html', user=user, form=form)
-
-
 @bp.route('/user/login/', methods=['GET', 'POST'])
 def user_login():
     form = LoginForm()
@@ -154,7 +145,6 @@ def user_login():
         user = current_users.get_user(form.name.data)
         login_user(user)
         user.set('authenticated', True)
-        user.set('active', True)
         flash('Login successful.', 'success')
         return redirect(request.args.get("next") or url_for('wiki.index'))
     return render_template('login.html', form=form)
@@ -164,7 +154,6 @@ def user_login():
 @login_required
 def user_logout():
     current_user.set('authenticated', False)
-    current_user.set('active', False)
     logout_user()
     flash('Logout successful.', 'success')
     return redirect(url_for('wiki.index'))
@@ -172,22 +161,59 @@ def user_logout():
 
 @bp.route('/user/')
 def user_index():
-    pass
+    user = current_users
+    usermanager = UserManager.read(user)
+    if current_user.get("roles") != ["admin"]:
+        flash("You do not have the permissions to see this page")
+        return render_template('index.html')
+
+    return render_template('user.html', usermanager = usermanager)
 
 
-@bp.route('/user/create/')
+@bp.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
-    pass
+    form = UserForm()
+    user = UserManager(current_app.config['USER_DIR'])
 
+    if form.validate_on_submit():
+        if form.admin.data:
+            roles = ['admin']
+        else:
+            roles = ''
+        user.add_user(form.name.data, form.password.data, True, roles, None)
+        return redirect(url_for("wiki.user_index"))
 
+    return render_template('usercreate.html', form=form)
+
+ 
 @bp.route('/user/<int:user_id>/')
 def user_admin(user_id):
     pass
 
+@bp.route('/user/update/<user_name>/', methods=['GET',"POST"])
+def user_update(user_name):
+    usermanager = UserManager(current_app.config["USER_DIR"])
+    user = usermanager.get_user(user_name)
+    form = UserForm()
+    
+    
+    if form.validate_on_submit():
+        if form.admin.data:
+            userdata = {"active": True, "authentication_method": "cleartext", "password":form.password.data, "authenticated": True, "roles":['admin']}
+        else:
+            userdata = {"active": True, "authentication_method": "cleartext", "password":form.password.data, "authenticated": True, "roles":[]}
+        usermanager.update(user_name, userdata)
+        return redirect(url_for("wiki.user_index"))
+    return render_template('update.html', form = form, user_name = user_name, password = user.get('password'))
 
-@bp.route('/user/delete/<int:user_id>/')
-def user_delete(user_id):
-    pass
+
+@bp.route('/user/delete/<user_name>/', methods=["POST"])
+def user_delete(user_name):
+    user = UserManager(current_app.config['USER_DIR'])
+
+    user.delete_user(user_name)
+    return redirect(url_for("wiki.user_index"))
+    
 
 
 """
@@ -200,48 +226,3 @@ def user_delete(user_id):
 def page_not_found(error):
     return render_template('404.html'), 404
 
-
-@bp.route('/history/<path:url>/', methods=['GET', 'POST'])
-@protect
-def history_list(url):
-    path = current_wiki.history_path(url)
-    # if history path doesn't exist, show no history page
-
-    page = current_wiki.get(url)
-
-    # no history or non-existent page
-    if not os.path.exists(path) or page is None:
-        return render_template("404.html")
-
-    file_ids = []
-    links = []
-
-    for filename in os.listdir(path):
-        if filename.endswith(".md"):
-            file_ids.append(get_history_id(filename))
-            continue
-        else:
-            continue
-
-    # show in reverse chronological order (most recent first)
-    file_ids.reverse()
-
-    for file_id in file_ids:
-        page_link = "/history_page/" + file_id + "/" + url
-        links.append(page_link)
-
-    return render_template('history_list.html', page=page, file_ids=file_ids, links=links)
-
-
-@bp.route('/history_page/<id>/<path:url>/', methods=['GET', 'POST'])
-@protect
-def history_page(id, url):
-    # build the url to the history page
-    url = "history/" + url + "/" + id
-
-    page = current_wiki.get_or_404(url)
-
-    # modify the title to include that it is an archived version
-    page.title = page.title + " (Old Revision: " + id + ")"
-
-    return render_template('history_page.html', page=page)

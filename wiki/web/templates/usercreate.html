@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}User Create{% endblock title %}
+
+{% block content %}
+<form class="form form-inline" method="POST">
+	{{ form.hidden_tag() }} <br>
+	{{ form.name(placeholder='Username') }}<br>
+    {{ form.password(placeholder='Password') }}<br>
+   	Is this account an admin: {{ form.admin()}}<br>
+	<input type="submit" class="btn btn-primary" value="Create">
+</form>
+{% endblock content %}

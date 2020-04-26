@@ -14,8 +14,6 @@ from wiki.core import clean_url
 from wiki.web import current_wiki
 from wiki.web import current_users
 
-from flask_login import current_user
-
 
 class URLForm(Form):
     url = TextField('', [InputRequired()])
@@ -34,6 +32,11 @@ class SearchForm(Form):
         description='Ignore Case',
         # FIXME: default is not correctly populated
         default=True)
+
+class UserForm(Form):
+    name = TextField('', [InputRequired()])
+    password = TextField('', [InputRequired()])
+    admin= BooleanField()
 
 
 class EditorForm(Form):
@@ -57,14 +60,3 @@ class LoginForm(Form):
             return
         if not user.check_password(field.data):
             raise ValidationError('Username and password do not match.')
-
-
-class UserUpdateForm(Form):
-    email = TextField('')
-    password = PasswordField('')
-    current_password = PasswordField('', [InputRequired()])
-
-    def validate_password(form, field):
-        user = current_user
-        if user.check_password(field.data):
-            return
