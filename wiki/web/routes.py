@@ -25,16 +25,12 @@ from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
 
-from wiki.web.history import update_history, get_history_id, format_history_id
-
-import os
 from wiki.web.user import UserManager
 from wiki.web.user import User
-#from Riki import app
+import os
 
 from wiki.web.history import update_history, get_history_id, format_history_id
 
-import os
 
 bp = Blueprint('wiki', __name__)
 
@@ -171,9 +167,15 @@ def user_logout():
 def user_index():
     user = current_users
     usermanager = UserManager.read(user)
+
     if 'admin' not in current_user.get("roles") :
         flash("You do not have the permissions to see this page")
         return render_template('index.html')
+
+    if current_user.get("roles") != ["admin"]:
+        flash("You do not have the permissions to see this page")
+        return render_template('index.html')
+
 
     return render_template('user.html', usermanager = usermanager)
 
@@ -183,6 +185,7 @@ def user_create():
     form = UserForm()
     user = UserManager(current_app.config['USER_DIR'])
 
+
     if form.validate_on_submit():
         if form.admin.data:
             roles = ['admin']
@@ -190,6 +193,14 @@ def user_create():
             roles = ''
         user.add_user(form.name.data, form.password.data, True, roles, form.authenticationMethod.data)
         return redirect(url_for("wiki.user_index"))
+    if form.validate_on_submit():
+        if form.admin.data:
+            roles = ['admin']
+        else:
+            roles = ''
+        user.add_user(form.name.data, form.password.data, True, roles, None)
+        return redirect(url_for("wiki.user_index"))
+
 
     return render_template('usercreate.html', form=form)
 
@@ -234,12 +245,7 @@ def user_delete(user_name):
 def page_not_found(error):
     return render_template('404.html'), 404
 
-
 @bp.route('/history/<path:url>/', methods=['GET', 'POST'])
-def history_list(url):
-    path = current_wiki.history_path(url)
-
-    # get the page for this url, if it exists
 @protect
 def history_list(url):
     path = current_wiki.history_path(url)
@@ -288,3 +294,4 @@ def history_page(id, url):
     page.title = page.title + " (Old Revision: " + format_history_id(id) + ")"
 
     return render_template('history_page.html', page=page)
+
