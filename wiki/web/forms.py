@@ -38,10 +38,7 @@ class UserForm(Form):
     name = TextField('', [InputRequired()])
     password = TextField('', [InputRequired()])
     admin= BooleanField()
-<<<<<<< HEAD
     authenticationMethod = SelectField("Authentication Method", choices=[('cleartext','cleartext'), ('hash','hash')])
-=======
->>>>>>> b859fc21175a1ee37773de31a88c6e504823ff54
 
 
 class EditorForm(Form):
