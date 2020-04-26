@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title -%}
+	History of {{ page.title }}
+{% endblock title %}
+
+{% block content %}
+    <ul>
+        {% for link_name in link_names %}
+            <li>
+                <a href="{{ links[loop.index0] }}">{{ link_name }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

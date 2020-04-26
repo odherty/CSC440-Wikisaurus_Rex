@@ -24,9 +24,16 @@ from wiki.web.forms import UserForm
 from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
+<<<<<<< HEAD
 from wiki.web.user import UserManager
 from wiki.web.user import User
 #from Riki import app
+=======
+
+from wiki.web.history import update_history, get_history_id, format_history_id
+
+import os
+>>>>>>> c8cc53c38f0383d0720562269d4a0766e239059a
 
 bp = Blueprint('wiki', __name__)
 
@@ -226,3 +233,55 @@ def user_delete(user_name):
 def page_not_found(error):
     return render_template('404.html'), 404
 
+<<<<<<< HEAD
+=======
+
+@bp.route('/history/<path:url>/', methods=['GET', 'POST'])
+@protect
+def history_list(url):
+    path = current_wiki.history_path(url)
+    # if history path doesn't exist, show no history page
+
+    page = current_wiki.get(url)
+
+    # no history or non-existent page, show the no history page
+    if not os.path.exists(path) or page is None:
+        return render_template("no_history.html", page_name=url)
+
+    file_ids = []
+    links = []
+    link_names = []
+
+    for filename in os.listdir(path):
+        if filename.endswith(".md"):
+            file_ids.append(get_history_id(filename))
+            continue
+        else:
+            continue
+
+    # show in reverse chronological order (most recent first)
+    file_ids.reverse()
+
+    for file_id in file_ids:
+        page_link = "/history_page/" + file_id + "/" + url
+        links.append(page_link)
+
+        link_name = format_history_id(file_id)
+        link_names.append(link_name)
+
+    return render_template('history_list.html', page=page, file_ids=file_ids, links=links, link_names=link_names)
+
+
+@bp.route('/history_page/<id>/<path:url>/', methods=['GET', 'POST'])
+@protect
+def history_page(id, url):
+    # build the url to the history page
+    url = "history/" + url + "/" + id
+
+    page = current_wiki.get_or_404(url)
+
+    # modify the title to include that it is an archived version
+    page.title = page.title + " (Old Revision: " + format_history_id(id) + ")"
+
+    return render_template('history_page.html', page=page)
+>>>>>>> c8cc53c38f0383d0720562269d4a0766e239059a
