@@ -5,9 +5,9 @@
 
 {% block content %}
     <ul>
-        {% for file_id in file_ids %}
+        {% for link_name in link_names %}
             <li>
-                <a href="{{ links[loop.index0] }}">{{ file_id }}</a>
+                <a href="{{ links[loop.index0] }}">{{ link_name }}</a>
             </li>
         {% endfor %}
     </ul>
