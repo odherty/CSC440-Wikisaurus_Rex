@@ -202,11 +202,10 @@ def page_not_found(error):
 
 
 @bp.route('/history/<path:url>/', methods=['GET', 'POST'])
-@protect
 def history_list(url):
     path = current_wiki.history_path(url)
-    # if history path doesn't exist, show no history page
 
+    # get the page for this url, if it exists
     page = current_wiki.get(url)
 
     # no history or non-existent page, show the no history page
@@ -217,6 +216,7 @@ def history_list(url):
     links = []
     link_names = []
 
+    # locate all files in the history directory with .md extensions
     for filename in os.listdir(path):
         if filename.endswith(".md"):
             file_ids.append(get_history_id(filename))
@@ -227,6 +227,7 @@ def history_list(url):
     # show in reverse chronological order (most recent first)
     file_ids.reverse()
 
+    # generate links and link names
     for file_id in file_ids:
         page_link = "/history_page/" + file_id + "/" + url
         links.append(page_link)

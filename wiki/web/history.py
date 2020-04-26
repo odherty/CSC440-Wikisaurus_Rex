@@ -32,12 +32,10 @@ def update_history(url):
 
     # now reverse to edit/rename the oldest files first
     history_files.reverse()
-    # now copy the newest version of the page to history so we can save its date (and for when the page is edited again)
 
     page_path = current_wiki.path(url)
 
     date_time_string = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
-    print(date_time_string)
 
     # copy the newest version of the page as
     shutil.copyfile(page_path, directory_path + "/" + date_time_string + ".md")
