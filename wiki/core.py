@@ -245,9 +245,6 @@ class Wiki(object):
     def path(self, url):
         return os.path.join(self.root, url + '.md')
 
-    def history_path(self, url):
-        return os.path.join(self.root, "history", url)
-
     def exists(self, url):
         path = self.path(url)
         return os.path.exists(path)
@@ -313,11 +310,6 @@ class Wiki(object):
         for cur_dir, _, files in os.walk(root):
             # get the url of the current directory
             cur_dir_url = cur_dir[len(root)+1:]
-
-            # ignore any files in the history directory
-            if cur_dir_url[:7] == "history":
-                continue
-
             for cur_file in files:
                 path = os.path.join(cur_dir, cur_file)
                 if cur_file.endswith('.md'):
