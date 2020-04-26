@@ -40,7 +40,7 @@ bp = Blueprint('wiki', __name__)
 def home():
     page = current_wiki.get('home')
     if page:
-        return display('home') 
+        return display('home')
     return render_template('home.html')
 
 
@@ -130,6 +130,29 @@ def tag(name):
     tagged = current_wiki.index_by_tag(name)
     return render_template('tag.html', pages=tagged, tag=name)
 
+@bp.route('/<path:url>/related/')
+@protect
+def related(url):
+    # get url
+    page = current_wiki.get_or_404(url)
+
+    # make list of tags about original article
+    tags = page.tags
+    tagslist =  tags.split(", ")
+
+    #blank list to hold other articles with the same tags
+    tagged = []
+    for i in tagslist:
+        # append tag category
+        tagged.append(i.capitalize())
+        #check if list of articles is only the original article, if not then add the article
+        if len(current_wiki.index_by_tag(i)) > 1:
+            tagged += current_wiki.index_by_tag(i)
+        #if there are no other articles other than the orignal article, append this statement
+        else:
+            tagged.append("No other wikis with this tag")
+
+    return render_template('related.html', tags=tagslist, page = page, pages = tagged)
 
 @bp.route('/search/', methods=['GET', 'POST'])
 @protect
@@ -140,6 +163,19 @@ def search():
         return render_template('search.html', form=form,
                                results=results, search=form.term.data)
     return render_template('search.html', form=form, search=None)
+
+
+@bp.route('/user/<string:username>', methods=['GET', 'POST'])
+def user_profile(username):
+    user = current_users.get_user(username)
+    form = UserUpdateForm()
+    if form.validate_on_submit():
+        if form.password.data != '':
+            current_user.set('password', form.password.data)
+        if form.email.data != '':
+            current_user.set('email', form.email.data)
+        flash('Profile Updated!', 'success')
+    return render_template('user.html', user=user, form=form)
 
 
 @bp.route('/user/login/', methods=['GET', 'POST'])
@@ -204,7 +240,7 @@ def user_create():
 
     return render_template('usercreate.html', form=form)
 
- 
+
 @bp.route('/user/<int:user_id>/')
 def user_admin(user_id):
     pass
@@ -214,8 +250,8 @@ def user_update(user_name):
     usermanager = UserManager(current_app.config["USER_DIR"])
     user = usermanager.get_user(user_name)
     form = UserForm()
-    
-    
+
+
     if form.validate_on_submit():
         if form.admin.data:
             userdata = {"active": True, "authentication_method": "cleartext", "password":form.password.data, "authenticated": True, "roles":['admin']}
@@ -232,7 +268,7 @@ def user_delete(user_name):
 
     user.delete_user(user_name)
     return redirect(url_for("wiki.user_index"))
-    
+
 
 
 """

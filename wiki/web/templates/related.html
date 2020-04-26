@@ -1,0 +1,69 @@
+{% block head %}
+	<style>
+		.darkgray{
+			background-color: #D3D3D3; 
+			color:white; 
+			text-shadow: 1px 1px 2px #696969;
+
+		}
+		.lightgray{
+			background-color: whitesmoke;
+            
+            
+		}
+        th, td{
+            border: 1px solid #e8e8e8;
+        }
+	</style>
+{% endblock %}
+
+{% extends "base.html" %}
+
+{% block title %}Similar Wiki Pages to {{page.title}}{% endblock title %}
+
+{% block content %}
+<b>{{page.title}} Tags:</b> {{page.tags}}
+<hr/>
+
+{% if pages|length > 1 %} <!-- check and see if there are any related wikis with the same tag -->
+	<table class="table">
+		<thead>
+			<tr>
+				<th class = "darkgray"> </th>
+                <th class = "darkgray">Title</th>
+                <th class = "darkgray">Tags</th>
+				<th class = "darkgray">URL</th>
+			</tr>
+		</thead>
+		<tbody>
+			
+			{% for page1 in pages %} <!-- loop through the list of articles with the same tags -->
+				{% if page1.title != page.title %} <!-- skip over the original article you are on so it does not show up in the list -->
+                    <tr>
+						{% if page1.url %} <!-- make sure page has a url otherwise it is a tag category -->
+							<td> </td>
+							<td><a href="{{ url_for('wiki.display', url=page1.url) }}">{{ page1.title }}</a></td>
+                        	<td>{{ page1.tags }}</td>
+							<td><a href="{{ url_for('wiki.display', url=page1.url) }}">{{ page1.url }}</a></td>
+						
+						{% elif page1 == "No other wikis with this tag" %} <!-- if page has this phrase in it only print out this phrase -->
+							<td> </td>
+							<td>{{ page1 }}</td>
+							<td> </td>
+							<td> </td>
+						
+						{% else %} <!-- now only the tag category is left -->
+							<td class = "lightgray"><b>{{ page1 }}</b></td>
+							<td class = "lightgray"> </td>
+							<td class = "lightgray"> </td>
+							<td class = "lightgray"> </td>
+						{% endif %}
+					</tr>
+				{% endif %}
+			{% endfor %}
+		</tbody>
+	</table>
+{% else %} <!-- print that there are no similar pages -->
+	<p>There are no other pages with similar tags.</p>
+{% endif %}
+{% endblock content %}
