@@ -14,12 +14,5 @@
     "roles": [
       "admin"
     ]
-  },
-  "emily": {
-    "active": true,
-    "authentication_method": "cleartext",
-    "password": "12",
-    "authenticated": true,
-    "roles": []
   }
 }
