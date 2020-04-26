@@ -135,7 +135,7 @@ def search():
 
 
 @bp.route('/user/<string:username>', methods=['GET', 'POST'])
-def user_display(username):
+def user_profile(username):
     user = current_users.get_user(username)
     form = UserUpdateForm()
     if form.validate_on_submit():
