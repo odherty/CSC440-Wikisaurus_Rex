@@ -1,22 +1,25 @@
-from unittest import mock
-import unittest
+import unittest, json
+from Riki import app
+from os import path, remove
+import datetime
+
+from wiki.web import current_users, UserManager
+from flask_login import current_user, login_user
+from wiki.web.forms import UserForm
+from wiki.web.routes import user_create
 
 
-def mockRender(**args):
-    returnValue = []
-    for i in args:
-        returnValue.append(i)
+class AdminUserTest(unittest.TestCase):
 
-    return returnValue
-
-
-
-class TestAdminPage(TestCase):
-
-    @mock.patch('flask.render_template','mockRender')
-    def test_user_create(mockRender):
-        response = user_create()
-        print(response)
-
+    def setUp(self):
+        self.user_mng = UserManager('../tests/')
+        self.app = app.test_client()
+        self.app.testing = True
 
      
+    def test_givenUser_whenChangePassword_thenJsonUpdates(self):
+        user = self.user_mng.get_user("name")
+        old_password = user.get('password')
+        user.set('password', '123')
+        self.assertEqual('123', user.get('password'))
+        user.set('password', old_password)
