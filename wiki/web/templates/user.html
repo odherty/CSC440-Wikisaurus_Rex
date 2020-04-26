@@ -9,6 +9,8 @@
        <h5> password: {{ value['password'] }}</h5>
        <h5> Roles: {{value['roles']}} </h5>
        <h5> Active: {{value['active']}} </h5>
+       <h5> Authenticated: {{ value['authenticated'] }}</h5>
+       <h5> Authentication Method: {{ value['authentication_method'] }}</h5>
        <h5><form action="/user/delete/{{ key }}/" method="post"><input type="submit" class="btn btn-primary" value="Delete"></form></h5>
         <br>
         <hr>

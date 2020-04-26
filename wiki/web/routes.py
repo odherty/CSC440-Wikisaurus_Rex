@@ -44,7 +44,7 @@ bp = Blueprint('wiki', __name__)
 def home():
     page = current_wiki.get('home')
     if page:
-        return display('home')
+        return display('home') 
     return render_template('home.html')
 
 
@@ -54,7 +54,7 @@ def index():
     pages = current_wiki.index()
     user = current_user.get("roles")
     isAdmin = False
-    if user == ['admin']:
+    if 'admin' in user:
         isAdmin = True
     return render_template('index.html', pages=pages, isAdmin = isAdmin)
 
@@ -171,7 +171,7 @@ def user_logout():
 def user_index():
     user = current_users
     usermanager = UserManager.read(user)
-    if current_user.get("roles") != ["admin"]:
+    if 'admin' not in current_user.get("roles") :
         flash("You do not have the permissions to see this page")
         return render_template('index.html')
 
@@ -188,7 +188,7 @@ def user_create():
             roles = ['admin']
         else:
             roles = ''
-        user.add_user(form.name.data, form.password.data, True, roles, None)
+        user.add_user(form.name.data, form.password.data, True, roles, form.authenticationMethod.data)
         return redirect(url_for("wiki.user_index"))
 
     return render_template('usercreate.html', form=form)

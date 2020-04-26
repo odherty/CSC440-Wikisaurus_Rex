@@ -7,6 +7,7 @@ from wtforms import BooleanField
 from wtforms import TextField
 from wtforms import TextAreaField
 from wtforms import PasswordField
+from wtforms import SelectField
 from wtforms.validators import InputRequired
 from wtforms.validators import ValidationError
 
@@ -37,6 +38,7 @@ class UserForm(Form):
     name = TextField('', [InputRequired()])
     password = TextField('', [InputRequired()])
     admin= BooleanField()
+    authenticationMethod = SelectField("Authentication Method", choices=[('cleartext','cleartext'), ('hash','hash')])
 
 
 class EditorForm(Form):
