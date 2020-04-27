@@ -30,5 +30,8 @@
 	<li><a href="{{ url_for('wiki.create') }}">New Page</a></li>
 	<li><a href="{{ url_for('wiki.tags') }}">Tag List</a></li>
 	<li><a href="{{ url_for('wiki.search') }}">Search</a></li>
+	{% if isAdmin %}
+		<li><a href="{{ url_for('wiki.user_index') }}">User Index</a></li>
+	{% endif %}
 </ul>
 {% endblock sidebar %}

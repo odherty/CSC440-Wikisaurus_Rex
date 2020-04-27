@@ -7,25 +7,30 @@ from flask import flash
 from flask import redirect
 from flask import render_template
 from flask import request
+from flask import current_app
 from flask import url_for
 from flask_login import current_user
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
+from werkzeug.datastructures import MultiDict
 
 from wiki.core import Processor
 from wiki.web.forms import EditorForm
 from wiki.web.forms import LoginForm
-from wiki.web.forms import UserUpdateForm
 from wiki.web.forms import SearchForm
 from wiki.web.forms import URLForm
+from wiki.web.forms import UserForm
 from wiki.web import current_wiki
 from wiki.web import current_users
 from wiki.web.user import protect
 
+from wiki.web.user import UserManager
+from wiki.web.user import User
+import os
+
 from wiki.web.history import update_history, get_history_id, format_history_id
 
-import os
 
 bp = Blueprint('wiki', __name__)
 
@@ -43,7 +48,11 @@ def home():
 @protect
 def index():
     pages = current_wiki.index()
-    return render_template('index.html', pages=pages)
+    user = current_user.get("roles")
+    isAdmin = False
+    if 'admin' in user:
+        isAdmin = True
+    return render_template('index.html', pages=pages, isAdmin = isAdmin)
 
 
 @bp.route('/<path:url>/')
@@ -73,7 +82,6 @@ def edit(url):
             page = current_wiki.get_bare(url)
         form.populate_obj(page)
         page.save()
-        update_history(url)
         flash('"%s" was saved.' % page.title, 'success')
         return redirect(url_for('wiki.display', url=url))
     return render_template('editor.html', form=form, page=page)
@@ -143,7 +151,7 @@ def related(url):
         #if there are no other articles other than the orignal article, append this statement
         else:
             tagged.append("No other wikis with this tag")
-      
+
     return render_template('related.html', tags=tagslist, page = page, pages = tagged)
 
 @bp.route('/search/', methods=['GET', 'POST'])
@@ -177,7 +185,6 @@ def user_login():
         user = current_users.get_user(form.name.data)
         login_user(user)
         user.set('authenticated', True)
-        user.set('active', True)
         flash('Login successful.', 'success')
         return redirect(request.args.get("next") or url_for('wiki.index'))
     return render_template('login.html', form=form)
@@ -187,7 +194,6 @@ def user_login():
 @login_required
 def user_logout():
     current_user.set('authenticated', False)
-    current_user.set('active', False)
     logout_user()
     flash('Logout successful.', 'success')
     return redirect(url_for('wiki.index'))
@@ -195,22 +201,74 @@ def user_logout():
 
 @bp.route('/user/')
 def user_index():
-    pass
+    user = current_users
+    usermanager = UserManager.read(user)
+
+    if 'admin' not in current_user.get("roles") :
+        flash("You do not have the permissions to see this page")
+        return render_template('index.html')
+
+    if current_user.get("roles") != ["admin"]:
+        flash("You do not have the permissions to see this page")
+        return render_template('index.html')
 
 
-@bp.route('/user/create/')
+    return render_template('user.html', usermanager = usermanager)
+
+
+@bp.route('/user/create/', methods=['GET', 'POST'])
 def user_create():
-    pass
+    form = UserForm()
+    user = UserManager(current_app.config['USER_DIR'])
+
+
+    if form.validate_on_submit():
+        if form.admin.data:
+            roles = ['admin']
+        else:
+            roles = ''
+        user.add_user(form.name.data, form.password.data, True, roles, form.authenticationMethod.data)
+        return redirect(url_for("wiki.user_index"))
+    if form.validate_on_submit():
+        if form.admin.data:
+            roles = ['admin']
+        else:
+            roles = ''
+        user.add_user(form.name.data, form.password.data, True, roles, None)
+        return redirect(url_for("wiki.user_index"))
+
+
+    return render_template('usercreate.html', form=form)
 
 
 @bp.route('/user/<int:user_id>/')
 def user_admin(user_id):
     pass
 
+@bp.route('/user/update/<user_name>/', methods=['GET',"POST"])
+def user_update(user_name):
+    usermanager = UserManager(current_app.config["USER_DIR"])
+    user = usermanager.get_user(user_name)
+    form = UserForm()
 
-@bp.route('/user/delete/<int:user_id>/')
-def user_delete(user_id):
-    pass
+
+    if form.validate_on_submit():
+        if form.admin.data:
+            userdata = {"active": True, "authentication_method": "cleartext", "password":form.password.data, "authenticated": True, "roles":['admin']}
+        else:
+            userdata = {"active": True, "authentication_method": "cleartext", "password":form.password.data, "authenticated": True, "roles":[]}
+        usermanager.update(user_name, userdata)
+        return redirect(url_for("wiki.user_index"))
+    return render_template('update.html', form = form, user_name = user_name, password = user.get('password'))
+
+
+@bp.route('/user/delete/<user_name>/', methods=["POST"])
+def user_delete(user_name):
+    user = UserManager(current_app.config['USER_DIR'])
+
+    user.delete_user(user_name)
+    return redirect(url_for("wiki.user_index"))
+
 
 
 """
@@ -223,12 +281,12 @@ def user_delete(user_id):
 def page_not_found(error):
     return render_template('404.html'), 404
 
-
 @bp.route('/history/<path:url>/', methods=['GET', 'POST'])
+@protect
 def history_list(url):
     path = current_wiki.history_path(url)
+    # if history path doesn't exist, show no history page
 
-    # get the page for this url, if it exists
     page = current_wiki.get(url)
 
     # no history or non-existent page, show the no history page
@@ -250,7 +308,6 @@ def history_list(url):
     # show in reverse chronological order (most recent first)
     file_ids.reverse()
 
-    # generate links and link names
     for file_id in file_ids:
         page_link = "/history_page/" + file_id + "/" + url
         links.append(page_link)
@@ -273,3 +330,4 @@ def history_page(id, url):
     page.title = page.title + " (Old Revision: " + format_history_id(id) + ")"
 
     return render_template('history_page.html', page=page)
+

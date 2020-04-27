@@ -26,8 +26,7 @@
 							</ul>
 
 							<ul class="nav pull-right">
-                                <li></li>
-								{% if not current_user.is_active %}
+								{% if current_user.is_anonymous %}
 									<li><a href="{{ url_for('wiki.user_login') }}">Login</a></li>
 								{% else %}
                                     <li><a href="{{ url_for('wiki.user_profile', username=current_user.get_id()) }}">{{ current_user.get_id() }}</a></li>
@@ -63,7 +62,7 @@
 						{% endif %}
 					{% endwith %}
 					{% if form and form.errors %}
-						<div class="alert alert-error">{{ form.errors }}Errors occured verifying your input. Please check the marked fields below.</div>
+						<div class="alert alert-error">Errors occured verifying your input. Please check the marked fields below.</div>
 					{% endif %}
 					{% block content %}
 					{% endblock content %}

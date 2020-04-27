@@ -1,8 +1,0 @@
-title: Lemon Facts
-tags: lemon
-
-lemons are yellow
-
-lemons are sour i think
-
-lemons cannot be ridden like a bicycle
