@@ -5,10 +5,10 @@
 {% block content %}
 <form class="form form-inline" method="POST">
     {{ form.hidden_tag() }}
-    <h3 disabled> User Name{{ form.name(value=user_name) }} </h3>
+    <h3> User Name{{ form.name(value=user_name) }} </h3>
     <h3> Password: {{ form.password(value=password) }}</h3>
     <h3> Make an Admin: {{form.admin }}</h3>
-
+    <h3> Authentication: {{form.authenticationMethod}} </h3>
     <input type="submit" class="btn btn_primary" value="update">
 </form>
 {% endblock content %}

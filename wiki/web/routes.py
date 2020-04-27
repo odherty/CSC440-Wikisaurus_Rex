@@ -233,6 +233,7 @@ def user_create():
             roles = ''
         user.add_user(form.name.data, form.password.data, True, roles, form.authenticationMethod.data)
         return redirect(url_for("wiki.user_index"))
+
     if form.validate_on_submit():
         if form.admin.data:
             roles = ['admin']
@@ -255,14 +256,15 @@ def user_update(user_name):
     user = usermanager.get_user(user_name)
     form = UserForm()
 
-
     if form.validate_on_submit():
+       
         if form.admin.data:
             userdata = {"active": True, "authentication_method": "cleartext", "password":form.password.data, "authenticated": True, "roles":['admin']}
         else:
             userdata = {"active": True, "authentication_method": "cleartext", "password":form.password.data, "authenticated": True, "roles":[]}
         usermanager.update(user_name, userdata)
         return redirect(url_for("wiki.user_index"))
+
     return render_template('update.html', form = form, user_name = user_name, password = user.get('password'))
 
 
