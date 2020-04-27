@@ -177,7 +177,7 @@ def user_profile(username):
         if form.email.data != '':
             current_user.set('email', form.email.data)
         flash('Profile Updated!', 'success')
-    return render_template('user.html', user=user, form=form)
+    return render_template('profile.html', user=user, form=form)
 
 
 @bp.route('/user/login/', methods=['GET', 'POST'])
