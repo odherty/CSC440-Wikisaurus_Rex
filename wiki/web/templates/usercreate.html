@@ -4,18 +4,11 @@
 
 {% block content %}
 <form class="form form-inline" method="POST">
-<<<<<<< HEAD
 	{{ form.hidden_tag() }} <br><br>
 	{{ form.name(placeholder='Username') }}<br> <br>
     {{ form.password(placeholder='Password') }}<br> <br>
 	Is this account an admin: {{ form.admin()}}<br> <br>
 	Authentication Method: {{ form.authenticationMethod }}<br>
-=======
-	{{ form.hidden_tag() }} <br>
-	{{ form.name(placeholder='Username') }}<br>
-    {{ form.password(placeholder='Password') }}<br>
-   	Is this account an admin: {{ form.admin()}}<br>
->>>>>>> b859fc21175a1ee37773de31a88c6e504823ff54
 	<input type="submit" class="btn btn-primary" value="Create">
 </form>
 {% endblock content %}

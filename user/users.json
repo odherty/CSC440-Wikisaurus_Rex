@@ -14,5 +14,12 @@
     "roles": [
       "admin"
     ]
+  },
+  "ewmil": {
+    "active": true,
+    "authentication_method": "cleartext",
+    "password": "jack",
+    "authenticated": true,
+    "roles": []
   }
 }
