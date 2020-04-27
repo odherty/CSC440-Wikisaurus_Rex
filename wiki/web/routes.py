@@ -286,9 +286,9 @@ def page_not_found(error):
     return render_template('404.html'), 404
 
 @bp.route('/history/<path:url>/', methods=['GET', 'POST'])
+@protect
 def history_list(url):
     path = current_wiki.history_path(url)
-    # if history path doesn't exist, show no history page
 
     # get the page for this url, if it exists
     page = current_wiki.get(url)

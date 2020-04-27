@@ -10,7 +10,6 @@ import datetime
 from wiki.web import current_wiki
 
 
-
 def update_history(url):
     # the directory containing past versions of the page
     directory_path = current_wiki.history_path(url)
@@ -33,22 +32,10 @@ def update_history(url):
 
     # now reverse to edit/rename the oldest files first
     history_files.reverse()
-    '''
-    for hf in history_files:
-        history_id, no_id = get_history_id(hf)  # split the file into it's id and date
-
-        history_id = int(history_id) # convert to a number to increment
-
-        # increment id by one and rename this history file
-        new_id = history_id + 1
-        os.rename(directory_path+"/"+hf, directory_path+"/"+str(new_id)+no_id)
-    '''
-    # now copy the newest version of the page to history so we can save its date (and for when the page is edited again)
 
     page_path = current_wiki.path(url)
 
     date_time_string = str(datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S"))
-    print(date_time_string)
 
     # copy the newest version of the page as
     shutil.copyfile(page_path, directory_path + "/" + date_time_string + ".md")
@@ -67,7 +54,6 @@ def get_date_from_id(hid):
 # formats the history id (containing date and time of edit) into a readable format for display
 def format_history_id(hid):
     time_str = hid[11:].replace("-", ":")
-    time_str = hid[14:].replace("-", ":")
     if time_str[0] == "0":
         time_str = time_str[1:]
 
