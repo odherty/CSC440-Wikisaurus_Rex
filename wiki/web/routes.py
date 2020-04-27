@@ -18,6 +18,7 @@ from werkzeug.datastructures import MultiDict
 from wiki.core import Processor
 from wiki.web.forms import EditorForm
 from wiki.web.forms import LoginForm
+from wiki.web.forms import UserUpdateForm
 from wiki.web.forms import SearchForm
 from wiki.web.forms import URLForm
 from wiki.web.forms import UserForm
@@ -82,6 +83,7 @@ def edit(url):
             page = current_wiki.get_bare(url)
         form.populate_obj(page)
         page.save()
+        update_history(url)
         flash('"%s" was saved.' % page.title, 'success')
         return redirect(url_for('wiki.display', url=url))
     return render_template('editor.html', form=form, page=page)
@@ -185,6 +187,7 @@ def user_login():
         user = current_users.get_user(form.name.data)
         login_user(user)
         user.set('authenticated', True)
+        user.set('active', True)
         flash('Login successful.', 'success')
         return redirect(request.args.get("next") or url_for('wiki.index'))
     return render_template('login.html', form=form)
@@ -194,6 +197,7 @@ def user_login():
 @login_required
 def user_logout():
     current_user.set('authenticated', False)
+    current_user.set('active', False)
     logout_user()
     flash('Logout successful.', 'success')
     return redirect(url_for('wiki.index'))
@@ -282,11 +286,11 @@ def page_not_found(error):
     return render_template('404.html'), 404
 
 @bp.route('/history/<path:url>/', methods=['GET', 'POST'])
-@protect
 def history_list(url):
     path = current_wiki.history_path(url)
     # if history path doesn't exist, show no history page
 
+    # get the page for this url, if it exists
     page = current_wiki.get(url)
 
     # no history or non-existent page, show the no history page
@@ -308,6 +312,7 @@ def history_list(url):
     # show in reverse chronological order (most recent first)
     file_ids.reverse()
 
+    # generate links and link names
     for file_id in file_ids:
         page_link = "/history_page/" + file_id + "/" + url
         links.append(page_link)
