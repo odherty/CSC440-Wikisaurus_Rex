@@ -2,6 +2,7 @@
     Forms
     ~~~~~
 """
+from flask_login import current_user
 from flask_wtf import Form
 from wtforms import BooleanField
 from wtforms import TextField
@@ -62,3 +63,14 @@ class LoginForm(Form):
             return
         if not user.check_password(field.data):
             raise ValidationError('Username and password do not match.')
+
+
+class UserUpdateForm(Form):
+    email = TextField('')
+    password = PasswordField('')
+    current_password = PasswordField('', [InputRequired()])
+
+    def validate_password(form, field):
+        user = current_user
+        if user.check_password(field.data):
+            return
